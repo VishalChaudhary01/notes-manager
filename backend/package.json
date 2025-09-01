@@ -1,0 +1,27 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc",
+    "dev": "dotenv -- tsc-watch --onSuccess \"node dist/index.js\"",
+    "start": "dotenv -- node dist/index.js"
+  },
+  "keywords": [],
+  "author": "Vishal Chaudhary",
+  "license": "ISC",
+  "description": "Notes Manager Server",
+  "dependencies": {
+    "dotenv": "^17.2.1",
+    "express": "^5.1.0",
+    "jsonwebtoken": "^9.0.2"
+  },
+  "devDependencies": {
+    "@tsconfig/node22": "^22.0.2",
+    "@types/express": "^5.0.3",
+    "@types/node": "^24.3.0",
+    "dotenv-cli": "^10.0.0",
+    "tsc-watch": "^7.1.1",
+    "typescript": "^5.9.2"
+  }
+}
