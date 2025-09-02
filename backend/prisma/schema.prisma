@@ -10,7 +10,7 @@ datasource db {
 model User {
   id              String             @id @default(cuid())
   name            String?            @db.VarChar(100)
-  date_of_birth   DateTime?
+  date_of_birth   DateTime?          @db.Date
   email           String             @unique @db.VarChar(255)
   provider        AuthProvider       @default(EMAIL)
   providerId      String?            @db.VarChar(100)
