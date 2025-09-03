@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import Notes from '@/components/notes';
@@ -7,8 +7,11 @@ import { useUser } from '@/contexts/user.context';
 import { signout } from '@/lib/apis';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Loader } from 'lucide-react';
+import AddNoteDialog from '@/components/add-note-dialog';
 
 export default function HomePage() {
+  const [openDialog, setOpenDialog] = useState<boolean>(false);
+
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
@@ -66,9 +69,13 @@ export default function HomePage() {
         </p>
       </div>
 
-      <Button className="w-full max-w-lg">Create Note</Button>
+      <Button onClick={() => setOpenDialog(true)} className="w-full max-w-lg">
+        Create Note
+      </Button>
 
       <Notes />
+
+      <AddNoteDialog open={openDialog} setOpen={setOpenDialog} />
     </div>
   );
 }

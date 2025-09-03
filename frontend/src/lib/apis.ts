@@ -58,7 +58,7 @@ export async function addNote(input: AddNoteType) {
   return responsee.data;
 }
 
-export async function deleteNote() {
-  const responsee = await axios.get('/notes/:id');
+export async function deleteNote(id: string) {
+  const responsee = await axios.delete(`/notes/${id}`);
   return responsee.data;
 }

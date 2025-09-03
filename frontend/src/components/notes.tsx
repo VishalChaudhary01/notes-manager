@@ -1,6 +1,7 @@
+import { toast } from 'sonner';
 import { Loader, Trash2 } from 'lucide-react';
-import { getAllNotes } from '@/lib/apis';
-import { useQuery } from '@tanstack/react-query';
+import { deleteNote, getAllNotes } from '@/lib/apis';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 export interface INote {
   id: string;
@@ -12,11 +13,28 @@ export interface INote {
 }
 
 export default function Notes() {
+  const queryClient = useQueryClient();
   const { data, isLoading } = useQuery({
     queryKey: ['notes'],
     queryFn: getAllNotes,
     retry: 2,
   });
+
+  const { mutate } = useMutation({
+    mutationFn: deleteNote,
+  });
+
+  function handleDelete(id: string) {
+    mutate(id, {
+      onSuccess: (result) => {
+        queryClient.invalidateQueries({ queryKey: ['notes'] });
+        toast.success(result.message);
+      },
+      onError: (error: any) => {
+        toast.error(error.response?.data?.message || 'Failed to delete note');
+      },
+    });
+  }
 
   if (isLoading) {
     return <Loader className="w-full place-self-center animate-spin " />;
@@ -34,7 +52,10 @@ export default function Notes() {
                 className="flex justify-between items-center border border-gray-200 shadow-md rounded-xl px-4 py-2"
               >
                 <span>{note.title}</span>
-                <button className="text-gray-700 hover:text-red-500">
+                <button
+                  onClick={() => handleDelete(note.id)}
+                  className="text-gray-700 hover:text-red-500"
+                >
                   <Trash2 />
                 </button>
               </div>

@@ -100,7 +100,7 @@ export default function SignupPage() {
                   <div className="relative">
                     <Input
                       type="email"
-                      placeholder="jonas_kahnwald@gmail.com"
+                      placeholder="Enter you email"
                       className="rounded-lg pr-10"
                       {...field}
                     />
