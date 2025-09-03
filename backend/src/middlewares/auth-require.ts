@@ -2,7 +2,9 @@ import { Request, Response, NextFunction } from 'express';
 import { env } from '../config/env';
 import { AppError } from '../utils/app-error';
 import { StatusCode } from '../config/status-code';
-import jwt from 'jsonwebtoken';
+import { JsonWebTokenError } from 'jsonwebtoken';
+import { getCookie } from '../utils/cookie';
+import { verifyJWT } from '../utils/jwt';
 
 export async function authRequire(
   req: Request,
@@ -10,23 +12,20 @@ export async function authRequire(
   next: NextFunction
 ) {
   try {
-    const token = req.cookies[env.AUTH_COOKIE_NAME];
-    if (!token) {
-      throw new AppError('No token found', StatusCode.FORBIDDEN);
-    }
+    const token = getCookie(req, env.AUTH_COOKIE_NAME);
 
-    const decoded = jwt.verify(token, env.JWT_SECRET) as {
-      userId: string;
-    };
+    const { userId } = verifyJWT(token);
 
-    const { userId } = decoded;
     if (!userId) {
-      throw new AppError('Invalid  token', StatusCode.BAD_REQUEST);
+      throw new AppError('Invalid or expired token', StatusCode.UNAUTHORIZED);
     }
 
     req.userId = userId;
     next();
   } catch (error) {
+    if (error instanceof JsonWebTokenError) {
+      throw new AppError('Invalid or expired token', StatusCode.UNAUTHORIZED);
+    }
     next(error);
   }
 }

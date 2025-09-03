@@ -2,7 +2,7 @@ import express from 'express';
 import cookieParser from 'cookie-parser';
 import { env } from './config/env';
 import { errorHandler } from './middlewares/error-handler';
-import { appRoutes } from './routes';
+import appRoutes from './routes';
 
 const app = express();
 const PORT = env.PORT;

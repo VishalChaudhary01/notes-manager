@@ -14,10 +14,12 @@ import {
 } from '../validators/auth.validator';
 import { authRequire } from '../middlewares/auth-require';
 
-export const authRoutes = Router();
+const authRoutes = Router();
 
 authRoutes.post('/signup', validate(signupSchema), signup);
 authRoutes.post('/signin', validate(signinSchema), signin);
 authRoutes.post('/resend-verification-token', resendVerificationToken);
 authRoutes.post('/verify-email', validate(verifyEmailSchema), verifyEmail);
 authRoutes.post('/signout', authRequire, signout);
+
+export default authRoutes;
