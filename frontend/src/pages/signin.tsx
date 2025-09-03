@@ -16,14 +16,17 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { resendVerificationToken, signin, verifyEmail } from '@/lib/apis';
+import { useUser } from '@/contexts/user.context';
 
 export default function SignupPage() {
   const [otpSent, setOtpSent] = useState(false);
   const [otp, setOtp] = useState('');
 
   const navigate = useNavigate();
+  const { setUser } = useUser();
+  const queryClient = useQueryClient();
 
   const form = useForm<SigninType>({
     resolver: zodResolver(signinSchema),
@@ -61,7 +64,8 @@ export default function SignupPage() {
     verifyEmailMutate(
       { code: otp },
       {
-        onSuccess: (result) => {
+        onSuccess: async (result) => {
+          await queryClient.invalidateQueries({ queryKey: ['profile'] });
           navigate('/');
           toast.success(result.message || 'Email verified successfully');
         },

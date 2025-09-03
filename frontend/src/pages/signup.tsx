@@ -13,17 +13,20 @@ import {
 import { Input } from '@/components/ui/input';
 import { Mail } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { resendVerificationToken, signup, verifyEmail } from '@/lib/apis';
 import { toast } from 'sonner';
 import { useState } from 'react';
 import { baseURL } from '@/lib/axios-client';
+import { useUser } from '@/contexts/user.context';
 
 export default function SignupPage() {
   const [otpSent, setOtpSent] = useState(false);
   const [otp, setOtp] = useState('');
 
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const { setUser } = useUser();
 
   const form = useForm<SignupType>({
     resolver: zodResolver(signupSchema),
@@ -63,7 +66,8 @@ export default function SignupPage() {
     verifyEmailMutate(
       { code: otp },
       {
-        onSuccess: (result) => {
+        onSuccess: async (result) => {
+          await queryClient.invalidateQueries({ queryKey: ['profile'] });
           navigate('/');
           toast.success(result.message || 'Email verified successfully');
         },
