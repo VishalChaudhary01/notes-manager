@@ -21,6 +21,19 @@ export function verifyJWT(token: string) {
     userId: string;
     type: TokenType;
   };
-
   return payload;
+}
+
+export function decodeJWT(token: string) {
+  const decoded = jwt.decode(token) as {
+    email: string;
+    name?: string;
+    sub?: string;
+  };
+
+  return {
+    email: decoded?.email,
+    name: decoded.name ?? '',
+    sub: decoded.sub,
+  };
 }

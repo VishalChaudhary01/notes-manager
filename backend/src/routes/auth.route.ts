@@ -1,5 +1,7 @@
 import { Router } from 'express';
 import {
+  googleAuth,
+  googleCallback,
   resendVerificationToken,
   signin,
   signout,
@@ -21,5 +23,8 @@ authRoutes.post('/signin', validate(signinSchema), signin);
 authRoutes.post('/resend-verification-token', resendVerificationToken);
 authRoutes.post('/verify-email', validate(verifyEmailSchema), verifyEmail);
 authRoutes.post('/signout', authRequire, signout);
+
+authRoutes.get('/google', googleAuth);
+authRoutes.get('/google/callback', googleCallback);
 
 export default authRoutes;

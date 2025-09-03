@@ -10,9 +10,11 @@ import { env } from '../config/env';
 import { prisma } from '../config/db';
 import { StatusCode } from '../config/status-code';
 import { AppError } from '../utils/app-error';
-import { signJWT, verifyJWT } from '../utils/jwt';
+import { decodeJWT, signJWT, verifyJWT } from '../utils/jwt';
 import { generateCode } from '../utils/generate-code';
 import { clearCookie, getCookie, setCookie } from '../utils/cookie';
+import queryString from 'query-string';
+import axios from 'axios';
 
 export async function signup(req: Request, res: Response) {
   const { name, email, dob }: SignupType = req.body;
@@ -236,4 +238,67 @@ export async function signin(req: Request, res: Response) {
 export async function signout(_req: Request, res: Response) {
   clearCookie(res, [env.VERIFICATION_COOKIE_NAME, env.AUTH_COOKIE_NAME]);
   res.status(StatusCode.OK).json({ message: 'Logout Successfully' });
+}
+
+export async function googleAuth(_req: Request, res: Response) {
+  const googleAuthUrl =
+    `https://accounts.google.com/o/oauth2/v2/auth?` +
+    `client_id=${env.GOOGLE_CLIENT_ID}&` +
+    `redirect_uri=${encodeURIComponent(env.GOOGLE_REDIRECT_URI)}&` +
+    `scope=${encodeURIComponent('profile email')}&` +
+    `response_type=code&` +
+    `access_type=offline`;
+
+  res.redirect(googleAuthUrl);
+}
+
+export async function googleCallback(req: Request, res: Response) {
+  const { code } = req.query;
+  if (!code) {
+    res.redirect(`${env.FRONTEND_URL}/signin?error=oauth_error`);
+  }
+
+  try {
+    const tokenRes = await axios.post(
+      'https://oauth2.googleapis.com/token',
+      queryString.stringify({
+        code,
+        client_id: env.GOOGLE_CLIENT_ID,
+        client_secret: env.GOOGLE_CLIENT_SECRET,
+        redirect_uri: env.GOOGLE_REDIRECT_URI,
+        grant_type: 'authorization_code',
+      }),
+      { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }
+    );
+
+    const { id_token } = tokenRes.data;
+
+    const { email, name, sub } = decodeJWT(id_token);
+
+    let user = await prisma.user.findUnique({
+      where: { email },
+    });
+
+    if (!user) {
+      user = await prisma.user.create({
+        data: {
+          email,
+          name,
+          provider: 'GOOGLE',
+          providerId: sub,
+          email_verified: true,
+        },
+      });
+    }
+
+    const token = signJWT(user.id, 'AUTH_TOKEN', '1d');
+    setCookie(res, token, env.AUTH_COOKIE_NAME, 24 * 60 * 60);
+
+    res.redirect(`${env.FRONTEND_URL}/dashboard`);
+  } catch (error) {
+    if (error instanceof JsonWebTokenError) {
+      throw new AppError('Invalid or expired token', StatusCode.UNAUTHORIZED);
+    }
+    throw error;
+  }
 }
