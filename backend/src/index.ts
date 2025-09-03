@@ -1,11 +1,13 @@
 import express from 'express';
 import cookieParser from 'cookie-parser';
+import cors from 'cors';
 import { env } from './config/env';
 import { errorHandler } from './middlewares/error-handler';
 import appRoutes from './routes';
 
 const app = express();
 const PORT = env.PORT;
+app.use(cors({ origin: env.FRONTEND_URL, credentials: true }));
 app.use(express.json());
 app.use(cookieParser());
 

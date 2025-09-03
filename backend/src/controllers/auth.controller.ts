@@ -294,7 +294,7 @@ export async function googleCallback(req: Request, res: Response) {
     const token = signJWT(user.id, 'AUTH_TOKEN', '1d');
     setCookie(res, token, env.AUTH_COOKIE_NAME, 24 * 60 * 60);
 
-    res.redirect(`${env.FRONTEND_URL}/dashboard`);
+    res.redirect(`${env.FRONTEND_URL}/`);
   } catch (error) {
     if (error instanceof JsonWebTokenError) {
       throw new AppError('Invalid or expired token', StatusCode.UNAUTHORIZED);

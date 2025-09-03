@@ -12,7 +12,7 @@ export function setCookie(
   res.cookie(name, token, {
     httpOnly: true,
     secure: env.NODE_ENV === 'production',
-    sameSite: 'lax',
+    sameSite: env.NODE_ENV === 'production' ? 'none' : 'lax',
     maxAge: age * 1000,
     path: '/',
   });
