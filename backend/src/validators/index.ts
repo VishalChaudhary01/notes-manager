@@ -27,3 +27,13 @@ export const codeSchema = z
   .string('Code is required')
   .trim()
   .regex(/^\d{6}$/, 'Code must be a 6-digit number');
+
+// Notes Title schema
+export const titleSchema = z
+  .string('Title is required')
+  .trim()
+  .min(2, { message: 'Title must be at least 2 characters' })
+  .max(100, { message: 'Title must be under 100 characters' });
+
+// Notes Content schema
+export const contentSchema = z.string().trim().optional();
